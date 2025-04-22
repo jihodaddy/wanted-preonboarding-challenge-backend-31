@@ -6,11 +6,11 @@ import com.preonboarding.challenge.exception.ResourceNotFoundException;
 import com.preonboarding.challenge.repository.CategoryRepository;
 import com.preonboarding.challenge.repository.ProductRepository;
 import com.preonboarding.challenge.service.dto.CategoryDto;
+import com.preonboarding.challenge.service.dto.PaginationDto;
 import com.preonboarding.challenge.service.mapper.CategoryMapper;
 import com.preonboarding.challenge.service.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,7 +111,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryDto.CategoryProductsResponse getCategoryProducts(Long categoryId, Boolean includeSubcategories, Pageable pageable) {
+    public CategoryDto.CategoryProductsResponse getCategoryProducts(
+            Long categoryId,
+            Boolean includeSubcategories,
+            PaginationDto.PaginationRequest paginationRequest
+    ) {
         // 카테고리 존재 확인
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
@@ -124,10 +128,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (Boolean.TRUE.equals(includeSubcategories)) {
             // 하위 카테고리 ID 수집
             List<Long> categoryIds = collectSubcategoryIds(categoryId);
-            productPage = productRepository.findByCategoriesIdIn(categoryIds, pageable);
+            productPage = productRepository.findByCategoriesIdIn(categoryIds, paginationRequest.toPageable());
         } else {
             // 현재 카테고리만 조회
-            productPage = productRepository.findByCategoriesId(categoryId, pageable);
+            productPage = productRepository.findByCategoriesId(categoryId, paginationRequest.toPageable());
         }
 
         // 응답 DTO 생성

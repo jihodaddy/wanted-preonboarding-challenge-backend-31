@@ -2,6 +2,7 @@ package com.preonboarding.challenge.service.mapper;
 
 import com.preonboarding.challenge.entity.Category;
 import com.preonboarding.challenge.service.dto.CategoryDto;
+import com.preonboarding.challenge.service.dto.PaginationDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -22,8 +23,8 @@ public interface CategoryMapper {
     CategoryDto.CategoryDetail toCategoryDetail(Category category);
 
     // 페이지네이션 정보 매핑
-    default CategoryDto.PaginationInfo toPaginationInfo(Page<?> page) {
-        return CategoryDto.PaginationInfo.builder()
+    default PaginationDto.PaginationInfo toPaginationInfo(Page<?> page) {
+        return PaginationDto.PaginationInfo.builder()
                 .totalItems((int) page.getTotalElements())
                 .totalPages(page.getTotalPages())
                 .currentPage(page.getNumber() + 1) // 0-based to 1-based

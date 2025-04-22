@@ -1,12 +1,10 @@
 package com.preonboarding.challenge.controller;
 
-import com.preonboarding.challenge.controller.dto.ProductCreateRequest;
-import com.preonboarding.challenge.controller.dto.ProductImageRequest;
-import com.preonboarding.challenge.controller.dto.ProductOptionRequest;
-import com.preonboarding.challenge.controller.dto.ProductUpdateRequest;
+import com.preonboarding.challenge.controller.dto.*;
 import com.preonboarding.challenge.controller.mapper.ProductControllerMapper;
 import com.preonboarding.challenge.service.ProductService;
 import com.preonboarding.challenge.service.dto.ProductDto;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -84,5 +82,13 @@ public class ProductController {
         ProductDto.ImageRequest serviceDto = mapper.toServiceImageRequest(request);
         ProductDto.ImageResponse response = productService.addProductImage(id, serviceDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response, "상품 이미지가 성공적으로 추가되었습니다."));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getProducts(@ParameterObject ProductListRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                productService.getProducts(mapper.toServiceListRequest(request)),
+                "상품 목록을 성공적으로 조회했습니다."
+        ));
     }
 }

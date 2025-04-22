@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -321,5 +323,29 @@ public class ProductDto {
         private Double average;
         private Integer count;
         private Map<Integer, Integer> distribution; // Map rating -> count (e.g., {5: 95, 4: 20, ...})
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ProductListRequest {
+        private String status;
+        private BigDecimal minPrice;
+        private BigDecimal maxPrice;
+        private List<Long> category;
+        private Long seller;
+        private Long brand;
+        private Boolean inStock;
+        private List<Long> tag;
+        private String keyword;
+
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        private LocalDate createdFrom;
+
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        private LocalDate createdTo;
+
+        private PaginationDto.PaginationRequest pagination;
     }
 }

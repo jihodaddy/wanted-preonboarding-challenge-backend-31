@@ -29,4 +29,9 @@ public interface ProductControllerMapper {
     ProductDto.OptionRequest toServiceOptionRequest(ProductOptionRequest request);
 
     ProductDto.ImageRequest toServiceImageRequest(ProductImageRequest request);
+
+    @Mapping(target = "pagination.page", source = "page")
+    @Mapping(target = "pagination.size", source = "perPage")
+    @Mapping(target = "pagination.sort", source = "sort")
+    ProductDto.ProductListRequest toServiceListRequest(com.preonboarding.challenge.controller.dto.ProductListRequest request);
 }

@@ -1,4 +1,4 @@
-package com.preonboarding.challenge.controller;
+package com.preonboarding.challenge.service.dto;
 
 import org.springframework.data.domain.Sort;
 

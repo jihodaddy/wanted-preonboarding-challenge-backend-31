@@ -2,6 +2,7 @@ package com.preonboarding.challenge.service.mapper;
 
 import com.preonboarding.challenge.entity.Review;
 import com.preonboarding.challenge.entity.User;
+import com.preonboarding.challenge.service.dto.PaginationDto;
 import com.preonboarding.challenge.service.dto.ReviewDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -56,20 +57,6 @@ public interface ReviewMapper {
                 .averageRating(averageRating)
                 .totalCount(reviews.size())
                 .distribution(distribution)
-                .build();
-    }
-
-    default <T, R> ReviewDto.Page<R> toPageDto(org.springframework.data.domain.Page<T> page, List<R> content) {
-        ReviewDto.PaginationInfo paginationInfo = ReviewDto.PaginationInfo.builder()
-                .totalItems((int) page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .currentPage(page.getNumber() + 1) // 0-based to 1-based
-                .perPage(page.getSize())
-                .build();
-
-        return ReviewDto.Page.<R>builder()
-                .items(content)
-                .pagination(paginationInfo)
                 .build();
     }
 }

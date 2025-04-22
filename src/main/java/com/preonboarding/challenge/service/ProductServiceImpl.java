@@ -1,14 +1,19 @@
 package com.preonboarding.challenge.service;
 
+import com.preonboarding.challenge.controller.dto.ProductListResponse;
 import com.preonboarding.challenge.entity.*;
 import com.preonboarding.challenge.exception.ResourceNotFoundException;
 import com.preonboarding.challenge.repository.*;
+import com.preonboarding.challenge.service.dto.PaginationDto;
 import com.preonboarding.challenge.service.dto.ProductDto;
 import com.preonboarding.challenge.service.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -280,5 +285,88 @@ public class ProductServiceImpl implements ProductService {
         image = imageRepository.save(image);
 
         return productMapper.toImageResponse(image);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductListResponse getProducts(ProductDto.ProductListRequest request) {
+        // Specification 생성 및 조합
+        Specification<Product> spec = Specification.where(null);
+
+        // 상태 필터
+        if (request.getStatus() != null) {
+            spec = spec.and(ProductSpecification.withStatus(request.getStatus()));
+        }
+
+        // 가격 범위 필터
+        if (request.getMinPrice() != null) {
+            spec = spec.and(ProductSpecification.withMinPrice(request.getMinPrice()));
+        }
+
+        if (request.getMaxPrice() != null) {
+            spec = spec.and(ProductSpecification.withMaxPrice(request.getMaxPrice()));
+        }
+
+        // 카테고리 필터
+        if (request.getCategory() != null && !request.getCategory().isEmpty()) {
+            spec = spec.and(ProductSpecification.withCategoryId(request.getCategory()));
+        }
+
+        // 판매자 필터
+        if (request.getSeller() != null) {
+            spec = spec.and(ProductSpecification.withSellerId(request.getSeller()));
+        }
+
+        // 브랜드 필터
+        if (request.getBrand() != null) {
+            spec = spec.and(ProductSpecification.withBrandId(request.getBrand()));
+        }
+
+        // 태그 필터
+        if (request.getTag() != null && !request.getTag().isEmpty()) {
+            spec = spec.and(ProductSpecification.withTagIds(request.getTag()));
+        }
+
+        // 재고 여부 필터
+        if (request.getInStock() != null) {
+            spec = spec.and(ProductSpecification.inStock(request.getInStock()));
+        }
+
+        // 검색어 필터
+        if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
+            spec = spec.and(ProductSpecification.withSearch(request.getKeyword()));
+        }
+
+        // 등록일 범위 필터
+        if (request.getCreatedFrom() != null) {
+            LocalDateTime fromDate = request.getCreatedFrom().atStartOfDay();
+            spec = spec.and(ProductSpecification.withCreatedDateAfter(fromDate));
+        }
+
+        if (request.getCreatedTo() != null) {
+            // 날짜의 끝(23:59:59)으로 설정
+            LocalDateTime toDate = request.getCreatedTo().plusDays(1).atStartOfDay().minusSeconds(1);
+            spec = spec.and(ProductSpecification.withCreatedDateBefore(toDate));
+        }
+
+        // 조회 실행
+        Page<Product> productPage = productRepository.findAll(spec, request.getPagination().toPageable());
+
+        // 결과 변환
+        List<ProductDto.ProductSummary> productSummaries = productMapper.toProductSummaryList(productPage.getContent());
+
+        // 페이지네이션 정보 생성
+        PaginationDto.PaginationInfo paginationInfo = PaginationDto.PaginationInfo.builder()
+                .totalItems((int) productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .currentPage(request.getPagination().getPage())
+                .perPage(request.getPagination().getSize())
+                .build();
+
+        // 응답 생성
+        return ProductListResponse.builder()
+                .items(productSummaries)
+                .pagination(paginationInfo)
+                .build();
     }
 }

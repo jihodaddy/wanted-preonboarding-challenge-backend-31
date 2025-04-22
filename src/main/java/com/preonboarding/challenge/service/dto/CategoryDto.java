@@ -56,17 +56,6 @@ public class CategoryDto {
     public static class CategoryProductsResponse {
         private CategoryDetail category;
         private List<ProductDto.ProductSummary> items;
-        private PaginationInfo pagination;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class PaginationInfo {
-        private Integer totalItems;
-        private Integer totalPages;
-        private Integer currentPage;
-        private Integer perPage;
+        private PaginationDto.PaginationInfo pagination;
     }
 }

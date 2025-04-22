@@ -74,26 +74,6 @@ public class ReviewDto {
     public static class ReviewPageResponse {
         private List<ReviewResponse> items;
         private ReviewSummary summary;
-        private PaginationInfo pagination;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Page<T> {
-        private java.util.List<T> items;
-        private PaginationInfo pagination;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class PaginationInfo {
-        private Integer totalItems;
-        private Integer totalPages;
-        private Integer currentPage;
-        private Integer perPage;
+        private PaginationDto.PaginationInfo pagination;
     }
 }

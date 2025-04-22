@@ -8,6 +8,7 @@ import com.preonboarding.challenge.exception.ResourceNotFoundException;
 import com.preonboarding.challenge.repository.ProductRepository;
 import com.preonboarding.challenge.repository.ReviewRepository;
 import com.preonboarding.challenge.repository.UserRepository;
+import com.preonboarding.challenge.service.dto.PaginationDto;
 import com.preonboarding.challenge.service.dto.ReviewDto;
 import com.preonboarding.challenge.service.mapper.ReviewMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,14 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional(readOnly = true)
-    public ReviewDto.ReviewPageResponse getProductReviews(Long productId, Integer rating, Pageable pageable) {
+    public ReviewDto.ReviewPageResponse getProductReviews(
+            Long productId,
+            Integer rating,
+            PaginationDto.PaginationRequest paginationRequest
+    ) {
+
         // 상품 존재 확인
-        Product product = productRepository.findById(productId)
+        productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
 
         // 모든 리뷰 조회 (summary 계산용)
@@ -45,9 +51,9 @@ public class ReviewServiceImpl implements ReviewService {
         // 평점 필터 적용하여 페이지 조회
         Page<Review> reviewPage;
         if (rating != null) {
-            reviewPage = reviewRepository.findByProductIdAndRating(productId, rating, pageable);
+            reviewPage = reviewRepository.findByProductIdAndRating(productId, rating, paginationRequest.toPageable());
         } else {
-            reviewPage = reviewRepository.findByProductId(productId, pageable);
+            reviewPage = reviewRepository.findByProductId(productId, paginationRequest.toPageable());
         }
 
         // 페이지 리뷰를 DTO로 변환
@@ -56,7 +62,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .collect(Collectors.toList());
 
         // 페이징 정보 생성
-        ReviewDto.PaginationInfo paginationInfo = ReviewDto.PaginationInfo.builder()
+        PaginationDto.PaginationInfo paginationInfo = PaginationDto.PaginationInfo.builder()
                 .totalItems((int) reviewPage.getTotalElements())
                 .totalPages(reviewPage.getTotalPages())
                 .currentPage(reviewPage.getNumber() + 1) // 0-based to 1-based

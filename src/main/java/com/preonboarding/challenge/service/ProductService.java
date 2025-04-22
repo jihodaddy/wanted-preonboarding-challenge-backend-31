@@ -1,5 +1,6 @@
 package com.preonboarding.challenge.service;
 
+import com.preonboarding.challenge.controller.dto.ProductListResponse;
 import com.preonboarding.challenge.service.dto.ProductDto;
 
 public interface ProductService {
@@ -12,6 +13,9 @@ public interface ProductService {
     ProductDto.UpdateResponse updateProduct(Long productId, ProductDto.UpdateRequest request);
 
     void deleteProduct(Long productId);
+
+    // 상품 목록 조회 (필터링, 정렬, 페이지네이션)
+    ProductListResponse getProducts(ProductDto.ProductListRequest request);
 
     // 옵션 관리
     ProductDto.OptionResponse addProductOption(Long productId, Long optionGroupId, ProductDto.OptionRequest option);

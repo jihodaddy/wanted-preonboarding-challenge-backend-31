@@ -1,5 +1,7 @@
 package com.preonboarding.challenge.controller;
 
+import com.preonboarding.challenge.service.dto.PaginationDto;
+import com.preonboarding.challenge.service.dto.Utils;
 import com.preonboarding.challenge.service.CategoryService;
 import com.preonboarding.challenge.service.dto.CategoryDto;
 import lombok.RequiredArgsConstructor;
@@ -45,15 +47,15 @@ public class CategoryController {
             @RequestParam(defaultValue = "created_at:desc") String sort,
             @RequestParam(defaultValue = "true") Boolean includeSubcategories) {
 
-        // 정렬 처리
-        Sort sortReq = Utils.createBasicSortBySortParams(sort);
-
-        // 페이지네이션 (0-based를 1-based로 변환)
-        Pageable pageable = PageRequest.of(page - 1, perPage, sortReq);
+        var paginationRequest = PaginationDto.PaginationRequest.builder()
+                .page(page)
+                .size(perPage)
+                .sort(sort)
+                .build();
 
         // 서비스 호출
         CategoryDto.CategoryProductsResponse response =
-                categoryService.getCategoryProducts(id, includeSubcategories, pageable);
+                categoryService.getCategoryProducts(id, includeSubcategories, paginationRequest);
 
         return ResponseEntity.ok(
                 ApiResponse.success(
