@@ -4,7 +4,7 @@ import com.preonboarding.challenge.service.dto.ProductDto;
 
 public interface ProductService {
 
-    // 상품 관리 API
+    // 상품 관리
     ProductDto.CreateResponse createProduct(ProductDto.CreateRequest request);
 
     ProductDto.ProductDetail getProductById(Long productId);
