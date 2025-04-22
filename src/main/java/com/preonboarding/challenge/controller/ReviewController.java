@@ -37,41 +37,15 @@ public class ReviewController {
             @RequestParam(required = false) Integer rating) {
 
         // 정렬 처리
-        String[] sortParams = sort.split(":");
-        String sortField = convertToCamelCase(sortParams[0]); // snake_case -> camelCase 변환
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sortReq = Utils.createBasicSortBySortParams(sort);
 
         // 페이지네이션 (0-based)
-        Pageable pageable = PageRequest.of(page - 1, perPage, Sort.by(direction, sortField));
+        Pageable pageable = PageRequest.of(page - 1, perPage, sortReq);
 
         // 서비스 호출
         ReviewDto.ReviewPageResponse reviewsPage = reviewService.getProductReviews(productId, rating, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(reviewsPage, "상품 리뷰를 성공적으로 조회했습니다."));
-    }
-
-    // snake_case -> camelCase 변환 메소드
-    private String convertToCamelCase(String snakeCase) {
-        if (snakeCase.contains("_")) {
-            StringBuilder result = new StringBuilder();
-            boolean capitalize = false;
-
-            for (char c : snakeCase.toCharArray()) {
-                if (c == '_') {
-                    capitalize = true;
-                } else if (capitalize) {
-                    result.append(Character.toUpperCase(c));
-                    capitalize = false;
-                } else {
-                    result.append(c);
-                }
-            }
-
-            return result.toString();
-        }
-
-        return snakeCase; // 이미 camelCase인 경우 그대로 반환
     }
 
     @PostMapping("/products/{productId}/reviews")

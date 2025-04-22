@@ -37,6 +37,22 @@ public abstract class ProductMapper {
     @Mapping(target = "relatedProducts", ignore = true) // 필요시 별도 매핑
     public abstract ProductDto.ProductDetail toProductDetail(Product product);
 
+    // Product → ProductSummary
+    @Mapping(target = "primaryImage", expression = "java(mapPrimaryImage(product))")
+    @Mapping(target = "brand", expression = "java(mapBrand(product.getBrand()))")
+    @Mapping(target = "seller", expression = "java(mapSeller(product.getSeller()))")
+    @Mapping(target = "rating", expression = "java(calculateAverageRating(product.getReviews()))")
+    @Mapping(target = "reviewCount", expression = "java(product.getReviews() != null ? product.getReviews().size() : 0)")
+    @Mapping(target = "inStock", expression = "java(checkInStock(product))")
+    @Mapping(target = "basePrice", expression = "java(product.getPrice() != null ? product.getPrice().getBasePrice() : null)")
+    @Mapping(target = "salePrice", expression = "java(product.getPrice() != null ? product.getPrice().getSalePrice() : null)")
+    @Mapping(target = "currency", expression = "java(product.getPrice() != null ? product.getPrice().getCurrency() : null)")
+    public abstract ProductDto.ProductSummary toProductSummary(Product product);
+
+    // Product 리스트를 ProductSummary 리스트로 변환
+    public abstract List<ProductDto.ProductSummary> toProductSummaryList(List<Product> products);
+
+
     @Mapping(target = "id", source = "id")
     @Mapping(target = "url", source = "url")
     @Mapping(target = "altText", source = "altText")
@@ -266,6 +282,78 @@ public abstract class ProductMapper {
             case "DELETED" -> ProductStatus.DELETED;
             default -> ProductStatus.ACTIVE;
         };
+    }
+
+    // 헬퍼 메서드: 대표 이미지 매핑
+    protected ProductDto.ImageDto mapPrimaryImage(Product product) {
+        if (product.getImages() == null || product.getImages().isEmpty()) {
+            return null;
+        }
+
+        // isPrimary가 true인 이미지를 찾음
+        return product.getImages().stream()
+                .filter(ProductImage::isPrimary)
+                .findFirst()
+                .map(image -> ProductDto.ImageDto.builder()
+                        .url(image.getUrl())
+                        .altText(image.getAltText())
+                        .build())
+                .orElse(null);
+    }
+
+    // 헬퍼 메서드: 브랜드 매핑
+    protected ProductDto.BrandDto mapBrand(Brand brand) {
+        if (brand == null) {
+            return null;
+        }
+
+        return ProductDto.BrandDto.builder()
+                .id(brand.getId())
+                .name(brand.getName())
+                .build();
+    }
+
+    // 헬퍼 메서드: 판매자 매핑
+    protected ProductDto.SellerDto mapSeller(Seller seller) {
+        if (seller == null) {
+            return null;
+        }
+
+        return ProductDto.SellerDto.builder()
+                .id(seller.getId())
+                .name(seller.getName())
+                .build();
+    }
+
+    // 헬퍼 메서드: 평균 평점 계산
+    protected Double calculateAverageRating(List<Review> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            return 0.0;
+        }
+
+        return reviews.stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+    }
+
+    // 헬퍼 메서드: 재고 여부 확인
+    protected boolean checkInStock(Product product) {
+        if (product.getStatus() == ProductStatus.OUT_OF_STOCK) {
+            return false;
+        }
+
+        // 모든 옵션의 재고 확인
+        if (product.getOptionGroups() != null && !product.getOptionGroups().isEmpty()) {
+            boolean hasStock = product.getOptionGroups().stream()
+                    .flatMap(group -> group.getOptions().stream())
+                    .anyMatch(option -> option.getStock() > 0);
+
+            return hasStock;
+        }
+
+        // 옵션이 없는 경우 기본적으로 재고 있음으로 간주
+        return true;
     }
 
     protected String convertMapToJsonString(Map<String, Object> map) {
