@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public class ReviewDto {
@@ -71,8 +72,9 @@ public class ReviewDto {
     @AllArgsConstructor
     @Builder
     public static class ReviewPageResponse {
+        private List<ReviewResponse> items;
         private ReviewSummary summary;
-        private Page<ReviewResponse> reviews;
+        private PaginationInfo pagination;
     }
 
     @Data

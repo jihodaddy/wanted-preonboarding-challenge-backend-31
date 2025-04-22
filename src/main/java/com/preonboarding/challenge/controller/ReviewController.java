@@ -5,8 +5,7 @@ import com.preonboarding.challenge.controller.dto.ReviewUpdateRequest;
 import com.preonboarding.challenge.controller.mapper.ReviewControllerMapper;
 import com.preonboarding.challenge.service.ReviewService;
 import com.preonboarding.challenge.service.dto.ReviewDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,11 +15,18 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
     private final ReviewControllerMapper mapper;
+
+    public ReviewController(
+            ReviewService reviewService,
+            @Qualifier("reviewControllerMapperImpl") ReviewControllerMapper mapper
+    ) {
+        this.reviewService = reviewService;
+        this.mapper = mapper;
+    }
 
     @GetMapping("/products/{productId}/reviews")
     public ResponseEntity<?> getProductReviews(
@@ -32,7 +38,7 @@ public class ReviewController {
 
         // 정렬 처리
         String[] sortParams = sort.split(":");
-        String sortField = sortParams[0];
+        String sortField = convertToCamelCase(sortParams[0]); // snake_case -> camelCase 변환
         Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
                 ? Sort.Direction.ASC : Sort.Direction.DESC;
 
@@ -40,9 +46,32 @@ public class ReviewController {
         Pageable pageable = PageRequest.of(page - 1, perPage, Sort.by(direction, sortField));
 
         // 서비스 호출
-        Page<ReviewDto.ReviewResponse> reviewsPage = reviewService.getProductReviews(productId, rating, pageable);
+        ReviewDto.ReviewPageResponse reviewsPage = reviewService.getProductReviews(productId, rating, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(reviewsPage, "상품 리뷰를 성공적으로 조회했습니다."));
+    }
+
+    // snake_case -> camelCase 변환 메소드
+    private String convertToCamelCase(String snakeCase) {
+        if (snakeCase.contains("_")) {
+            StringBuilder result = new StringBuilder();
+            boolean capitalize = false;
+
+            for (char c : snakeCase.toCharArray()) {
+                if (c == '_') {
+                    capitalize = true;
+                } else if (capitalize) {
+                    result.append(Character.toUpperCase(c));
+                    capitalize = false;
+                } else {
+                    result.append(c);
+                }
+            }
+
+            return result.toString();
+        }
+
+        return snakeCase; // 이미 camelCase인 경우 그대로 반환
     }
 
     @PostMapping("/products/{productId}/reviews")

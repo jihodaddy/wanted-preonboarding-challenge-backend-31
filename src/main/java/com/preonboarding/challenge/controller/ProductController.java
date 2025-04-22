@@ -7,18 +7,25 @@ import com.preonboarding.challenge.controller.dto.ProductUpdateRequest;
 import com.preonboarding.challenge.controller.mapper.ProductControllerMapper;
 import com.preonboarding.challenge.service.ProductService;
 import com.preonboarding.challenge.service.dto.ProductDto;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/products")
-@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
     private final ProductControllerMapper mapper;
+
+    public ProductController(
+            ProductService productService,
+            @Qualifier("productControllerMapperImpl") ProductControllerMapper mapper
+    ) {
+        this.productService = productService;
+        this.mapper = mapper;
+    }
 
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest request) {

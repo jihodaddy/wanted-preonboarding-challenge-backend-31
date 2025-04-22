@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +31,18 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ReviewDto.ReviewResponse> getProductReviews(Long productId, Integer rating, Pageable pageable) {
+    public ReviewDto.ReviewPageResponse getProductReviews(Long productId, Integer rating, Pageable pageable) {
         // 상품 존재 확인
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
 
-        // 평점 필터 적용
+        // 모든 리뷰 조회 (summary 계산용)
+        List<Review> allReviews = reviewRepository.findAllByProductId(productId);
+
+        // 리뷰 요약 정보 계산
+        ReviewDto.ReviewSummary summary = reviewMapper.toReviewSummary(allReviews);
+
+        // 평점 필터 적용하여 페이지 조회
         Page<Review> reviewPage;
         if (rating != null) {
             reviewPage = reviewRepository.findByProductIdAndRating(productId, rating, pageable);
@@ -42,8 +50,25 @@ public class ReviewServiceImpl implements ReviewService {
             reviewPage = reviewRepository.findByProductId(productId, pageable);
         }
 
-        // DTO 변환
-        return reviewPage.map(reviewMapper::toReviewResponse);
+        // 페이지 리뷰를 DTO로 변환
+        List<ReviewDto.ReviewResponse> reviewResponses = reviewPage.getContent().stream()
+                .map(reviewMapper::toReviewResponse)
+                .collect(Collectors.toList());
+
+        // 페이징 정보 생성
+        ReviewDto.PaginationInfo paginationInfo = ReviewDto.PaginationInfo.builder()
+                .totalItems((int) reviewPage.getTotalElements())
+                .totalPages(reviewPage.getTotalPages())
+                .currentPage(reviewPage.getNumber() + 1) // 0-based to 1-based
+                .perPage(reviewPage.getSize())
+                .build();
+
+        // API 스펙에 맞게 응답 생성 (수정됨)
+        return ReviewDto.ReviewPageResponse.builder()
+                .items(reviewResponses) // 변경: reviews.items -> items
+                .summary(summary)
+                .pagination(paginationInfo) // 변경: reviews.pagination -> pagination
+                .build();
     }
 
     @Override
