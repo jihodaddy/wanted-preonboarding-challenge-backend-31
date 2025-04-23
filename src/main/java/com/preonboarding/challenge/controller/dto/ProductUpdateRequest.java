@@ -22,6 +22,6 @@ public class ProductUpdateRequest {
 
     private ProductCreateRequest.ProductDetailDto detail;
     private ProductCreateRequest.ProductPriceDto price;
-    private List<Long> categoryIds;
+    private List<ProductCreateRequest.ProductCategoryDto> categories;
     private List<Long> tagIds;
 }

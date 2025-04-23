@@ -66,8 +66,11 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // 카테고리 연결
-        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
-            List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
+        if (request.getCategories() != null && !request.getCategories().isEmpty()) {
+            List<Long> categoryIds = request.getCategories().stream()
+                    .map(ProductDto.ProductCategoryDto::getCategoryId)
+                    .toList();
+            List<Category> categories = categoryRepository.findAllById(categoryIds);
             product.getCategories().addAll(categories);
         }
 
@@ -153,9 +156,12 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // 카테고리 업데이트
-        if (request.getCategoryIds() != null) {
+        if (request.getCategories() != null) {
             product.getCategories().clear();
-            List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
+            List<Long> categoryIds = request.getCategories().stream()
+                    .map(ProductDto.ProductCategoryDto::getCategoryId)
+                    .toList();
+            List<Category> categories = categoryRepository.findAllById(categoryIds);
             product.getCategories().addAll(categories);
         }
 

@@ -26,7 +26,7 @@ public class ProductCreateRequest {
     private ProductDetailDto detail;
     private ProductPriceDto price;
     @Builder.Default
-    private List<Long> categoryIds = new ArrayList<>();
+    private List<ProductCategoryDto> categories = new ArrayList<>();
     @Builder.Default
     private List<OptionGroupDto> optionGroups = new ArrayList<>();
     @Builder.Default
@@ -58,6 +58,15 @@ public class ProductCreateRequest {
         private BigDecimal costPrice;
         private String currency;
         private BigDecimal taxRate;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ProductCategoryDto {
+        private Long categoryId;
+        private Boolean isPrimary = false;
     }
 
     @Data

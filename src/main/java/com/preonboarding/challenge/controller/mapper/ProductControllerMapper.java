@@ -20,10 +20,12 @@ public interface ProductControllerMapper {
     @Mapping(target = "price", source = "price")
     @Mapping(target = "optionGroups", source = "optionGroups")
     @Mapping(target = "images", source = "images")
+    @Mapping(target = "categories", source = "categories")
     ProductDto.CreateRequest toServiceDto(ProductCreateRequest request);
 
     @Mapping(target = "detail", source = "detail")
     @Mapping(target = "price", source = "price")
+    @Mapping(target = "categories", source = "categories")
     ProductDto.UpdateRequest toServiceUpdateDto(ProductUpdateRequest request);
 
     ProductDto.OptionRequest toServiceOptionRequest(ProductOptionRequest request);

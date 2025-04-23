@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "product_details")
@@ -25,6 +27,7 @@ public class ProductDetail {
     private Double weight;
 
     @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String dimensions; // JSON: {"width": float, "height": float, "depth": float}
 
     @Column(length = 500)
@@ -40,5 +43,6 @@ public class ProductDetail {
     private String careInstructions;
 
     @Column(name = "additional_info", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String additionalInfo; // JSON object for additional information
 }
