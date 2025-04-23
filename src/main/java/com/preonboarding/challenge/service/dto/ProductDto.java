@@ -347,7 +347,7 @@ public class ProductDto {
         private Long brand;
         private Boolean inStock;
         private List<Long> tag;
-        private String keyword;
+        private String search;
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         private LocalDate createdFrom;

@@ -20,6 +20,7 @@ public class ProductListRequest {
     private Long brand;
     private Boolean inStock;
     private List<Long> tag;
+    private String search;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate createdFrom;

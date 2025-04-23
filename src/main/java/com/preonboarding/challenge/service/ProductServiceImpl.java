@@ -339,8 +339,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // 검색어 필터
-        if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
-            spec = spec.and(ProductSpecification.withSearch(request.getKeyword()));
+        if (request.getSearch() != null && !request.getSearch().isEmpty()) {
+            spec = spec.and(ProductSpecification.withSearch(request.getSearch()));
         }
 
         // 등록일 범위 필터
