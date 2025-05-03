@@ -6,24 +6,24 @@ import com.preonboarding.challenge.service.dto.ProductDto;
 public interface ProductService {
 
     // 상품 관리
-    ProductDto.CreateResponse createProduct(ProductDto.CreateRequest request);
+    ProductDto.Product createProduct(ProductDto.CreateRequest request);
 
-    ProductDto.ProductDetail getProductById(Long productId);
-
-    ProductDto.UpdateResponse updateProduct(Long productId, ProductDto.UpdateRequest request);
+    ProductDto.Product updateProduct(Long productId, ProductDto.UpdateRequest request);
 
     void deleteProduct(Long productId);
 
-    // 상품 목록 조회 (필터링, 정렬, 페이지네이션)
-    ProductListResponse getProducts(ProductDto.ProductListRequest request);
-
     // 옵션 관리
-    ProductDto.OptionResponse addProductOption(Long productId, Long optionGroupId, ProductDto.OptionRequest option);
+    ProductDto.Option addProductOption(Long productId, ProductDto.Option option);
 
-    ProductDto.OptionResponse updateProductOption(Long productId, Long optionId, ProductDto.OptionRequest option);
+    ProductDto.Option updateProductOption(Long productId, ProductDto.Option option);
 
     void deleteProductOption(Long productId, Long optionId);
 
     // 이미지 관리
-    ProductDto.ImageResponse addProductImage(Long productId, ProductDto.ImageRequest image);
+    ProductDto.Image addProductImage(Long productId, ProductDto.Image image);
+
+    // 상품 조회
+    ProductDto.Product getProductById(Long productId);
+
+    ProductListResponse getProducts(ProductDto.ListRequest request);
 }

@@ -13,17 +13,17 @@ public class MainPageDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class MainPageResponse {
+    public static class MainPage {
         private List<ProductDto.ProductSummary> newProducts;
         private List<ProductDto.ProductSummary> popularProducts;
-        private List<FeaturedCategoryDto> featuredCategories;
+        private List<FeaturedCategory> featuredCategories;
     }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class FeaturedCategoryDto {
+    public static class FeaturedCategory {
         private Long id;
         private String name;
         private String slug;

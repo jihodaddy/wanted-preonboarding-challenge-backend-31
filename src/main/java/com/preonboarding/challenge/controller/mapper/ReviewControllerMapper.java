@@ -3,16 +3,24 @@ package com.preonboarding.challenge.controller.mapper;
 import com.preonboarding.challenge.controller.dto.ReviewCreateRequest;
 import com.preonboarding.challenge.controller.dto.ReviewUpdateRequest;
 import com.preonboarding.challenge.service.dto.ReviewDto;
-import org.mapstruct.Mapper;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface ReviewControllerMapper {
+@Component
+public class ReviewControllerMapper {
 
-    ReviewDto.CreateRequest toServiceDto(ReviewCreateRequest request);
+    public ReviewDto.CreateRequest toReviewDtoCreateRequest(ReviewCreateRequest request) {
+        return ReviewDto.CreateRequest.builder()
+                .rating(request.getRating())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build();
+    }
 
-    ReviewDto.UpdateRequest toServiceUpdateDto(ReviewUpdateRequest request);
+    public ReviewDto.UpdateRequest toReviewDtoUpdateRequest(ReviewUpdateRequest request) {
+        return ReviewDto.UpdateRequest.builder()
+                .rating(request.getRating())
+                .content(request.getContent())
+                .build();
+    }
+
 }

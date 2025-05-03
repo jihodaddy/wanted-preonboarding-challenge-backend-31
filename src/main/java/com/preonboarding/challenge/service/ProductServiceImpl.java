@@ -8,6 +8,7 @@ import com.preonboarding.challenge.service.dto.PaginationDto;
 import com.preonboarding.challenge.service.dto.ProductDto;
 import com.preonboarding.challenge.service.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDto.CreateResponse createProduct(ProductDto.CreateRequest request) {
+    public ProductDto.Product createProduct(ProductDto.CreateRequest request) {
         // 1. 기본 Product 엔티티 생성
         Product product = productMapper.toProductEntity(request);
 
@@ -68,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
         // 카테고리 연결
         if (request.getCategories() != null && !request.getCategories().isEmpty()) {
             List<Long> categoryIds = request.getCategories().stream()
-                    .map(ProductDto.ProductCategoryDto::getCategoryId)
+                    .map(ProductDto.ProductCategory::getCategoryId)
                     .toList();
             List<Category> categories = categoryRepository.findAllById(categoryIds);
             product.getCategories().addAll(categories);
@@ -82,14 +83,14 @@ public class ProductServiceImpl implements ProductService {
 
         // 옵션 그룹 및 옵션 생성
         if (request.getOptionGroups() != null) {
-            for (ProductDto.OptionGroupDto groupDto : request.getOptionGroups()) {
-                ProductOptionGroup group = productMapper.toOptionGroupEntity(groupDto, product);
+            for (ProductDto.OptionGroup groupDto : request.getOptionGroups()) {
+                ProductOptionGroup group = productMapper.toProductOptionGroupEntity(groupDto, product);
                 product.getOptionGroups().add(group);
 
                 // 옵션 생성
                 if (groupDto.getOptions() != null) {
-                    for (ProductDto.OptionDto optionDto : groupDto.getOptions()) {
-                        ProductOption option = productMapper.toOptionEntity(optionDto, group);
+                    for (ProductDto.Option optionDto : groupDto.getOptions()) {
+                        ProductOption option = productMapper.toProductOptionEntity(optionDto, group);
                         group.getOptions().add(option);
                     }
                 }
@@ -98,39 +99,30 @@ public class ProductServiceImpl implements ProductService {
 
         // 이미지 생성
         if (request.getImages() != null) {
-            for (ProductDto.ImageRequest imageDto : request.getImages()) {
+            for (ProductDto.Image imageDto : request.getImages()) {
                 ProductOption option = null;
                 if (imageDto.getOptionId() != null) {
                     option = optionRepository.findById(imageDto.getOptionId())
                             .orElse(null);
                 }
-                ProductImage image = productMapper.toImageEntity(imageDto, product, option);
+                ProductImage image = productMapper.toProductImageEntity(imageDto, product, option);
                 product.getImages().add(image);
             }
         }
 
         // 최종 저장 및 응답 생성
         product = productRepository.save(product);
-        return productMapper.toCreateResponse(product);
+        return productMapper.toProductDto(product);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public ProductDto.ProductDetail getProductById(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
 
-        return productMapper.toProductDetail(product);
-    }
 
     @Override
     @Transactional
-    public ProductDto.UpdateResponse updateProduct(Long productId, ProductDto.UpdateRequest request) {
+    public ProductDto.Product updateProduct(Long productId, ProductDto.UpdateRequest request) {
         Product product = productRepository.findById(productId)
+                .map(entity -> productMapper.updateProductEntity(request, entity))
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
-
-        // 기본 필드 업데이트
-        productMapper.updateProductEntity(request, product);
 
         // 연관 엔티티 업데이트
         if (request.getSellerId() != null) {
@@ -159,7 +151,7 @@ public class ProductServiceImpl implements ProductService {
         if (request.getCategories() != null) {
             product.getCategories().clear();
             List<Long> categoryIds = request.getCategories().stream()
-                    .map(ProductDto.ProductCategoryDto::getCategoryId)
+                    .map(ProductDto.ProductCategory::getCategoryId)
                     .toList();
             List<Category> categories = categoryRepository.findAllById(categoryIds);
             product.getCategories().addAll(categories);
@@ -174,7 +166,8 @@ public class ProductServiceImpl implements ProductService {
 
         // 저장 및 응답 생성
         product = productRepository.save(product);
-        return productMapper.toUpdateResponse(product);
+
+        return productMapper.toProductDto(product);
     }
 
     @Override
@@ -193,7 +186,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDto.OptionResponse addProductOption(Long productId, Long optionGroupId, ProductDto.OptionRequest request) {
+    public ProductDto.Option addProductOption(Long productId, ProductDto.Option request) {
+        var optionGroupId = request.getOptionGroupId();
+
         ProductOptionGroup optionGroup = optionGroupRepository.findById(optionGroupId)
                 .orElseThrow(() -> new ResourceNotFoundException("OptionGroup", optionGroupId));
 
@@ -203,7 +198,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // OptionDto 생성 및 변환
-        ProductDto.OptionDto optionDto = ProductDto.OptionDto.builder()
+        ProductDto.Option optionDto = ProductDto.Option.builder()
                 .optionGroupId(optionGroupId)
                 .name(request.getName())
                 .additionalPrice(request.getAdditionalPrice())
@@ -213,15 +208,17 @@ public class ProductServiceImpl implements ProductService {
                 .build();
 
         // 옵션 엔티티 생성 및 저장
-        ProductOption option = productMapper.toOptionEntity(optionDto, optionGroup);
+        ProductOption option = productMapper.toProductOptionEntity(optionDto, optionGroup);
         option = optionRepository.save(option);
 
-        return productMapper.toOptionResponse(option);
+        return productMapper.toOptionDto(option);
     }
 
     @Override
     @Transactional
-    public ProductDto.OptionResponse updateProductOption(Long productId, Long optionId, ProductDto.OptionRequest request) {
+    public ProductDto.Option updateProductOption(Long productId, ProductDto.Option request) {
+        var optionId = request.getId();
+
         ProductOption option = optionRepository.findById(optionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Option", optionId));
 
@@ -252,7 +249,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         option = optionRepository.save(option);
-        return productMapper.toOptionResponse(option);
+        return productMapper.toOptionDto(option);
     }
 
     @Override
@@ -271,7 +268,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDto.ImageResponse addProductImage(Long productId, ProductDto.ImageRequest request) {
+    public ProductDto.Image addProductImage(Long productId, ProductDto.Image request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
 
@@ -287,15 +284,24 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // 이미지 엔티티 생성 및 저장
-        ProductImage image = productMapper.toImageEntity(request, product, option);
+        ProductImage image = productMapper.toProductImageEntity(request, product, option);
         image = imageRepository.save(image);
 
-        return productMapper.toImageResponse(image);
+        return productMapper.toImageDto(image);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProductListResponse getProducts(ProductDto.ProductListRequest request) {
+    public ProductDto.Product getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
+
+        return productMapper.toProductDto(product);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductListResponse getProducts(ProductDto.ListRequest request) {
         // Specification 생성 및 조합
         Specification<Product> spec = Specification.where(null);
 
@@ -359,7 +365,9 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = productRepository.findAll(spec, request.getPagination().toPageable());
 
         // 결과 변환
-        List<ProductDto.ProductSummary> productSummaries = productMapper.toProductSummaryList(productPage.getContent());
+        List<ProductDto.ProductSummary> productSummaries = productPage.stream()
+                .map(productMapper::toProductSummaryDto)
+                .toList();
 
         // 페이지네이션 정보 생성
         PaginationDto.PaginationInfo paginationInfo = PaginationDto.PaginationInfo.builder()

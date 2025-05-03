@@ -13,7 +13,6 @@ import com.preonboarding.challenge.service.dto.ReviewDto;
 import com.preonboarding.challenge.service.mapper.ReviewMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional(readOnly = true)
-    public ReviewDto.ReviewPageResponse getProductReviews(
+    public ReviewDto.ReviewPage getProductReviews(
             Long productId,
             Integer rating,
             PaginationDto.PaginationRequest paginationRequest
@@ -57,8 +56,8 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         // 페이지 리뷰를 DTO로 변환
-        List<ReviewDto.ReviewResponse> reviewResponses = reviewPage.getContent().stream()
-                .map(reviewMapper::toReviewResponse)
+        List<ReviewDto.Review> reviewResponses = reviewPage.getContent().stream()
+                .map(reviewMapper::toReviewDto)
                 .collect(Collectors.toList());
 
         // 페이징 정보 생성
@@ -70,7 +69,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .build();
 
         // API 스펙에 맞게 응답 생성 (수정됨)
-        return ReviewDto.ReviewPageResponse.builder()
+        return ReviewDto.ReviewPage.builder()
                 .items(reviewResponses) // 변경: reviews.items -> items
                 .summary(summary)
                 .pagination(paginationInfo) // 변경: reviews.pagination -> pagination
@@ -79,7 +78,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional
-    public ReviewDto.ReviewResponse createReview(Long productId, Long userId, ReviewDto.CreateRequest request) {
+    public ReviewDto.Review createReview(Long productId, Long userId, ReviewDto.CreateRequest request) {
         // 상품 존재 확인
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
@@ -89,7 +88,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         // 리뷰 생성
-        Review review = Review.builder()
+        Review review = com.preonboarding.challenge.entity.Review.builder()
                 .product(product)
                 .user(user)
                 .rating(request.getRating())
@@ -105,12 +104,12 @@ public class ReviewServiceImpl implements ReviewService {
         review = reviewRepository.save(review);
 
         // 응답 변환
-        return reviewMapper.toReviewResponse(review);
+        return reviewMapper.toReviewDto(review);
     }
 
     @Override
     @Transactional
-    public ReviewDto.ReviewResponse updateReview(Long reviewId, Long userId, ReviewDto.UpdateRequest request) {
+    public ReviewDto.Review updateReview(Long reviewId, Long userId, ReviewDto.UpdateRequest request) {
         // 리뷰 존재 확인
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId));
@@ -139,7 +138,7 @@ public class ReviewServiceImpl implements ReviewService {
         review = reviewRepository.save(review);
 
         // 응답 변환
-        return reviewMapper.toReviewResponse(review);
+        return reviewMapper.toReviewDto(review);
     }
 
     @Override

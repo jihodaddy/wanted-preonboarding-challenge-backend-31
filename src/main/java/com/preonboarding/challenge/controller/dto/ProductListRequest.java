@@ -1,5 +1,6 @@
 package com.preonboarding.challenge.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductListRequest {
     private Integer page = 1;
     private Integer perPage = 10;

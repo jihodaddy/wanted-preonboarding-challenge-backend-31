@@ -3,27 +3,44 @@ package com.preonboarding.challenge.service.mapper;
 import com.preonboarding.challenge.entity.Category;
 import com.preonboarding.challenge.service.dto.CategoryDto;
 import com.preonboarding.challenge.service.dto.PaginationDto;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface CategoryMapper {
 
-    // Category → CategoryResponse (계층 구조 포함)
-    @Mapping(target = "children", ignore = true)
-    CategoryDto.CategoryResponse toCategoryResponse(Category category);
+@Component
+public class CategoryMapper {
 
-    // Category → CategoryDetail (부모 정보 포함)
-    @Mapping(target = "parent", source = "parent")
-    CategoryDto.CategoryDetail toCategoryDetail(Category category);
+    public CategoryDto.Category toCategoryResponse(Category category) {
+        return CategoryDto.Category.builder()
+            .id(category.getId())
+                .name(category.getName())
+                .slug(category.getSlug())
+                .description(category.getDescription())
+                .level(category.getLevel())
+                .imageUrl(category.getImageUrl())
+                .children(category.getChildren().stream()
+                        .map(this::toCategoryResponse)
+                        .toList())
+                .build();
+    }
 
-    // 페이지네이션 정보 매핑
-    default PaginationDto.PaginationInfo toPaginationInfo(Page<?> page) {
+    public CategoryDto.Detail toCategoryDetail(Category category) {
+        return CategoryDto.Detail.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .slug(category.getSlug())
+                .description(category.getDescription())
+                .level(category.getLevel())
+                .imageUrl(category.getImageUrl())
+                .parent(CategoryDto.ParentCategory.builder()
+                        .id(category.getParent().getId())
+                        .name(category.getParent().getName())
+                        .slug(category.getParent().getSlug())
+                        .build())
+                .build();
+    }
+
+    public PaginationDto.PaginationInfo toPaginationInfo(Page<?> page) {
         return PaginationDto.PaginationInfo.builder()
                 .totalItems((int) page.getTotalElements())
                 .totalPages(page.getTotalPages())

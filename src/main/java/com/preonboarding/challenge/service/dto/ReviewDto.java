@@ -35,9 +35,9 @@ public class ReviewDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ReviewResponse {
+    public static class Review {
         private Long id;
-        private UserDto user;
+        private User user;
         private Integer rating;
         private String title;
         private String content;
@@ -51,7 +51,7 @@ public class ReviewDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class UserDto {
+    public static class User {
         private Long id;
         private String name;
         private String avatarUrl;
@@ -71,8 +71,8 @@ public class ReviewDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ReviewPageResponse {
-        private List<ReviewResponse> items;
+    public static class ReviewPage {
+        private List<Review> items;
         private ReviewSummary summary;
         private PaginationDto.PaginationInfo pagination;
     }

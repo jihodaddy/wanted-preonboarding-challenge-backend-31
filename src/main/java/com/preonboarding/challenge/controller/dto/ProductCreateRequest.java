@@ -1,5 +1,6 @@
 package com.preonboarding.challenge.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductCreateRequest {
     private String name;
     private String slug;
@@ -38,6 +40,7 @@ public class ProductCreateRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductDetailDto {
         private Double weight;
         private Map<String, Object> dimensions;
@@ -52,6 +55,7 @@ public class ProductCreateRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductPriceDto {
         private BigDecimal basePrice;
         private BigDecimal salePrice;
@@ -64,6 +68,7 @@ public class ProductCreateRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductCategoryDto {
         private Long categoryId;
         private Boolean isPrimary = false;
@@ -73,6 +78,7 @@ public class ProductCreateRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OptionGroupDto {
         private String name;
         private Integer displayOrder;
@@ -84,6 +90,7 @@ public class ProductCreateRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OptionDto {
         private String name;
         private BigDecimal additionalPrice;
@@ -96,6 +103,7 @@ public class ProductCreateRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ImageDto {
         private String url;
         private String altText;

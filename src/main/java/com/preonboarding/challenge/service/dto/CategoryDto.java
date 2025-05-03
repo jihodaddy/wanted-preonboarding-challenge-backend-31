@@ -14,7 +14,7 @@ public class CategoryDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class CategoryResponse {
+    public static class Category {
         private Long id;
         private String name;
         private String slug;
@@ -22,39 +22,33 @@ public class CategoryDto {
         private Integer level;
         private String imageUrl;
         @Builder.Default
-        private List<CategoryResponse> children = new ArrayList<>();
+        private List<Category> children = new ArrayList<>();
     }
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Builder
-    public static class CategoryDetail {
+    public static class Detail {
         private Long id;
         private String name;
         private String slug;
         private String description;
         private Integer level;
         private String imageUrl;
-        private ParentCategoryDto parent;
+        private ParentCategory parent;
     }
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Builder
-    public static class ParentCategoryDto {
+    public static class ParentCategory {
         private Long id;
         private String name;
         private String slug;
     }
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Builder
-    public static class CategoryProductsResponse {
-        private CategoryDetail category;
+    public static class CategoryProducts {
+        private Detail category;
         private List<ProductDto.ProductSummary> items;
         private PaginationDto.PaginationInfo pagination;
     }

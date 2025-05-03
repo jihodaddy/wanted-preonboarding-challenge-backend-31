@@ -2,31 +2,39 @@ package com.preonboarding.challenge.service.mapper;
 
 import com.preonboarding.challenge.entity.Review;
 import com.preonboarding.challenge.entity.User;
-import com.preonboarding.challenge.service.dto.PaginationDto;
 import com.preonboarding.challenge.service.dto.ReviewDto;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface ReviewMapper {
+@Component
+public class ReviewMapper {
 
-    @Mapping(target = "user", source = "user")
-    ReviewDto.ReviewResponse toReviewResponse(Review review);
+    public ReviewDto.Review toReviewDto(Review review) {
+        return ReviewDto.Review.builder()
+                .id(review.getId())
+                .user(toUserDto(review.getUser()))
+                .rating(review.getRating())
+                .title(review.getTitle())
+                .content(review.getContent())
+                .createdAt(review.getCreatedAt())
+                .updatedAt(review.getUpdatedAt())
+                .verifiedPurchase(review.isVerifiedPurchase())
+                .helpfulVotes(review.getHelpfulVotes())
+                .build();
+    }
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "avatarUrl", source = "avatarUrl")
-    ReviewDto.UserDto toUserDto(User user);
+    public ReviewDto.User toUserDto(User user) {
+        return ReviewDto.User.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .avatarUrl(user.getAvatarUrl())
+                .build();
+    }
 
-    default ReviewDto.ReviewSummary toReviewSummary(List<Review> reviews) {
+    public ReviewDto.ReviewSummary toReviewSummary(List<Review> reviews) {
         if (reviews == null || reviews.isEmpty()) {
             return ReviewDto.ReviewSummary.builder()
                     .averageRating(0.0)
@@ -37,14 +45,14 @@ public interface ReviewMapper {
 
         // 평균 평점 계산
         double averageRating = reviews.stream()
-                .mapToInt(Review::getRating)
+                .mapToInt(com.preonboarding.challenge.entity.Review::getRating)
                 .average()
                 .orElse(0.0);
 
         // 평점별 분포 계산
         Map<Integer, Integer> distribution = reviews.stream()
                 .collect(Collectors.groupingBy(
-                        Review::getRating,
+                        com.preonboarding.challenge.entity.Review::getRating,
                         Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
                 ));
 

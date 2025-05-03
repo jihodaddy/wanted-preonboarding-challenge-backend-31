@@ -26,7 +26,7 @@ public class MainServiceImpl implements MainService {
 
     @Override
     @Transactional(readOnly = true)
-    public MainPageDto.MainPageResponse getMainPageContents() {
+    public MainPageDto.MainPage getMainPageContents() {
         // 1. 신규 상품 조회 (최근 등록순 10개)
         List<Product> newProducts = productRepository.findTop5ByStatusOrderByCreatedAtDesc(ProductStatus.ACTIVE);
 
@@ -47,10 +47,10 @@ public class MainServiceImpl implements MainService {
             categoryProductCounts.put(categoryId, productCount);
         }
 
-        List<MainPageDto.FeaturedCategoryDto> featuredCategories = categories.stream()
+        List<MainPageDto.FeaturedCategory> featuredCategories = categories.stream()
                 .map(category -> {
                     long productCount = categoryProductCounts.getOrDefault(category.getId(), 0L);
-                    return MainPageDto.FeaturedCategoryDto.builder()
+                    return MainPageDto.FeaturedCategory.builder()
                             .id(category.getId())
                             .name(category.getName())
                             .slug(category.getSlug())
@@ -64,9 +64,9 @@ public class MainServiceImpl implements MainService {
                 .collect(Collectors.toList());
 
         // 결과 DTO 생성 및 반환
-        return MainPageDto.MainPageResponse.builder()
-                .newProducts(productMapper.toProductSummaryList(newProducts))
-                .popularProducts(productMapper.toProductSummaryList(popularProducts))
+        return MainPageDto.MainPage.builder()
+                .newProducts(newProducts.stream().map(productMapper::toProductSummaryDto).toList())
+                .popularProducts(popularProducts.stream().map(productMapper::toProductSummaryDto).toList())
                 .featuredCategories(featuredCategories)
                 .build();
     }

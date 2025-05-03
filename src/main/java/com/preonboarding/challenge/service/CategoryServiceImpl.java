@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryDto.CategoryResponse> getAllCategories(Integer level) {
+    public List<CategoryDto.Category> getAllCategories(Integer level) {
         if (level != null) {
             // 특정 레벨의 카테고리만 조회하되, 그 하위 계층 구조도 포함
             List<Category> categories = categoryRepository.findByLevel(level);
@@ -61,13 +61,13 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 전체 카테고리의 계층 구조를 구성
      */
-    private List<CategoryDto.CategoryResponse> buildCategoryHierarchy() {
+    private List<CategoryDto.Category> buildCategoryHierarchy() {
         // 1. 모든 카테고리 조회
         List<Category> allCategories = categoryRepository.findAll();
 
         // 2. 카테고리 ID -> 카테고리 맵 구성
         Map<Long, Category> categoryMap = allCategories.stream()
-                .collect(Collectors.toMap(Category::getId, category -> category));
+                .collect(Collectors.toMap(com.preonboarding.challenge.entity.Category::getId, category -> category));
 
         // 3. 자식 카테고리 맵 구성 (부모 ID -> 자식 카테고리 리스트)
         Map<Long, List<Category>> childrenMap = new HashMap<>();
@@ -93,14 +93,14 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 재귀적으로 카테고리 트리 구성
      */
-    private CategoryDto.CategoryResponse buildCategoryTree(Category category, Map<Long, List<Category>> childrenMap) {
+    private CategoryDto.Category buildCategoryTree(Category category, Map<Long, List<Category>> childrenMap) {
         // 1. 현재 카테고리를 DTO로 변환
-        CategoryDto.CategoryResponse responseDto = categoryMapper.toCategoryResponse(category);
+        CategoryDto.Category responseDto = categoryMapper.toCategoryResponse(category);
 
         // 2. 자식 카테고리가 있는 경우 재귀적으로 추가
         List<Category> children = childrenMap.getOrDefault(category.getId(), new ArrayList<>());
         if (!children.isEmpty()) {
-            List<CategoryDto.CategoryResponse> childrenDto = children.stream()
+            List<CategoryDto.Category> childrenDto = children.stream()
                     .map(child -> buildCategoryTree(child, childrenMap))
                     .collect(Collectors.toList());
             responseDto.setChildren(childrenDto);
@@ -111,7 +111,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryDto.CategoryProductsResponse getCategoryProducts(
+    public CategoryDto.CategoryProducts getCategoryProducts(
             Long categoryId,
             Boolean includeSubcategories,
             PaginationDto.PaginationRequest paginationRequest
@@ -121,7 +121,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
 
         // 카테고리 정보 매핑
-        CategoryDto.CategoryDetail categoryDetail = categoryMapper.toCategoryDetail(category);
+        CategoryDto.Detail categoryDetail = categoryMapper.toCategoryDetail(category);
 
         // 상품 조회
         Page<Product> productPage;
@@ -135,9 +135,9 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         // 응답 DTO 생성
-        return CategoryDto.CategoryProductsResponse.builder()
+        return CategoryDto.CategoryProducts.builder()
                 .category(categoryDetail)
-                .items(productMapper.toProductSummaryList(productPage.getContent()))
+                .items(productPage.getContent().stream().map(productMapper::toProductSummaryDto).toList())
                 .pagination(categoryMapper.toPaginationInfo(productPage))
                 .build();
     }
@@ -154,7 +154,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         // 카테고리 ID -> 카테고리 매핑
         Map<Long, Category> categoryMap = allCategories.stream()
-                .collect(Collectors.toMap(Category::getId, c -> c));
+                .collect(Collectors.toMap(com.preonboarding.challenge.entity.Category::getId, c -> c));
 
         // 부모 ID -> 자식 카테고리 리스트 매핑
         Map<Long, List<Category>> childrenMap = new HashMap<>();
@@ -184,7 +184,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryDto.CategoryResponse getCategoryById(Long categoryId) {
+    public CategoryDto.Category getCategoryById(Long categoryId) {
         // 카테고리 존재 확인
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));

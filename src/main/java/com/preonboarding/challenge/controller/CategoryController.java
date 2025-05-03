@@ -1,13 +1,9 @@
 package com.preonboarding.challenge.controller;
 
 import com.preonboarding.challenge.service.dto.PaginationDto;
-import com.preonboarding.challenge.service.dto.Utils;
 import com.preonboarding.challenge.service.CategoryService;
 import com.preonboarding.challenge.service.dto.CategoryDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +26,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCategoryById(@PathVariable Long id) {
-        CategoryDto.CategoryResponse category = categoryService.getCategoryById(id);
+        CategoryDto.Category category = categoryService.getCategoryById(id);
         return ResponseEntity.ok(
                 ApiResponse.success(
                         category,
@@ -54,7 +50,7 @@ public class CategoryController {
                 .build();
 
         // 서비스 호출
-        CategoryDto.CategoryProductsResponse response =
+        CategoryDto.CategoryProducts response =
                 categoryService.getCategoryProducts(id, includeSubcategories, paginationRequest);
 
         return ResponseEntity.ok(
