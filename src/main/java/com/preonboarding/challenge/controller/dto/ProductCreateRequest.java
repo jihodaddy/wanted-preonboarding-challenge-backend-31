@@ -2,7 +2,6 @@ package com.preonboarding.challenge.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +12,6 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductCreateRequest {
     private String name;
@@ -27,19 +24,13 @@ public class ProductCreateRequest {
 
     private ProductDetailDto detail;
     private ProductPriceDto price;
-    @Builder.Default
     private List<ProductCategoryDto> categories = new ArrayList<>();
-    @Builder.Default
     private List<OptionGroupDto> optionGroups = new ArrayList<>();
-    @Builder.Default
     private List<ImageDto> images = new ArrayList<>();
-    @Builder.Default
     private List<Long> tagIds = new ArrayList<>();
 
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductDetailDto {
         private Double weight;
@@ -53,8 +44,6 @@ public class ProductCreateRequest {
 
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductPriceDto {
         private BigDecimal basePrice;
@@ -66,8 +55,6 @@ public class ProductCreateRequest {
 
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductCategoryDto {
         private Long categoryId;
@@ -76,20 +63,15 @@ public class ProductCreateRequest {
 
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OptionGroupDto {
         private String name;
         private Integer displayOrder;
-        @Builder.Default
         private List<OptionDto> options = new ArrayList<>();
     }
 
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OptionDto {
         private String name;
@@ -101,8 +83,6 @@ public class ProductCreateRequest {
 
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ImageDto {
         private String url;
