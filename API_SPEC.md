@@ -8,14 +8,20 @@
 > 
 > 데이터 생성과 조회에 집중하여 실습을 진행하시면 됩니다.
 
+> ❗️ **주의사항**
+> 
+> API 명세는 예시로 작성된 것으로 상세한 내용에는 오류가 있을 수 있습니다.
+> 
+> 실제 구현시에는 API 명세와 맥락 상 일치하도록 구현하시면 됩니다.
+
+
 ## 목차
 1. [공통 응답 포맷](#공통-응답-포맷)
 2. [에러 응답 모델](#에러-응답-모델)
 3. [상품 관리 API](#상품-관리-api)
 4. [카테고리 API](#카테고리-api)
-5. [검색 API](#검색-api)
-6. [메인 페이지 API](#메인-페이지-api)
-7. [리뷰 API](#리뷰-api)
+5. [메인 페이지 API](#메인-페이지-api)
+6. [리뷰 API](#리뷰-api)
 
 ## 공통 응답 포맷
 
@@ -37,10 +43,10 @@
  "data": {
    "items": [ /* 응답 데이터 배열 */ ],
    "pagination": {
-     "totalItems": 100,
-     "totalPages": 10,
-     "currentPage": 1,
-     "perPage": 10
+     "total_items": 100,
+     "total_pages": 10,
+     "current_page": 1,
+     "per_page": 10
    }
  },
  "message": "요청이 성공적으로 처리되었습니다."
@@ -282,10 +288,10 @@ Authorization: Bearer {token}
      // ... 추가 상품 항목
    ],
    "pagination": {
-     "totalItems": 100,
-     "totalPages": 10,
-     "currentPage": 1,
-     "perPage": 10
+     "total_items": 100,
+     "total_pages": 10,
+     "current_page": 1,
+     "per_page": 10
    }
  },
  "message": "상품 목록을 성공적으로 조회했습니다."
@@ -634,7 +640,7 @@ Authorization: Bearer {token}
 }
 ```
 
-### 상품 옵션 수정
+### [Optional] 상품 옵션 수정
 
 **PUT /api/products/{id}/options/{optionId}**
 
@@ -844,113 +850,26 @@ Authorization: Bearer {token}
          "id": 2,
          "name": "편안가구"
        },
+       "seller": {
+         "id": 1,
+         "name": "홈퍼니처"
+       },
        "rating": 4.7,
        "review_count": 128,
        "in_stock": true,
+       "status": "ACTIVE",
        "created_at": "2025-04-10T09:30:00Z"
      },
      // ... 추가 상품 항목
    ],
    "pagination": {
-     "totalItems": 45,
-     "totalPages": 5,
-     "currentPage": 1,
-     "perPage": 10
+     "total_items": 45,
+     "total_pages": 5,
+     "current_page": 1,
+     "per_page": 10
    }
  },
  "message": "카테고리 상품 목록을 성공적으로 조회했습니다."
-}
-```
-
-## 검색 API
-
-### 상품 검색
-
-**GET /api/search**
-
-키워드 기반으로 상품을 검색합니다.
-
-**요청 파라미터**
-```
-?q=소파&page=1&perPage=10&sort=relevance:desc&category=5&minPrice=10000&maxPrice=1000000&brand=2
-```
-
-| 파라미터 | 타입 | 필수 여부 | 설명 |
-|---------|------|----------|------|
-| category | int[] | 아니오 | 카테고리 ID 필터 (여러 개인 경우 콤마로 구분) |
-| minPrice | int | 아니오 | 최소 가격 필터 |
-| maxPrice | int | 아니오 | 최대 가격 필터 |
-| brand | int[] | 아니오 | 브랜드 ID 필터 (여러 개인 경우 콤마로 구분) |
-| seller | int[] | 아니오 | 판매자 ID 필터 (여러 개인 경우 콤마로 구분) |
-| inStock | boolean | 아니오 | 재고 유무 필터 |
-| rating | float | 아니오 | 최소 평점 필터 |
-
-**응답 모델 (성공 - 200 OK)**
-```json
-{
- "success": true,
- "data": {
-   "keyword": "소파",
-   "total_count": 87,
-   "items": [
-     {
-       "id": 123,
-       "name": "슈퍼 편안한 소파",
-       "slug": "super-comfortable-sofa",
-       "short_description": "최고급 소재로 만든 편안한 소파",
-       "base_price": 599000,
-       "sale_price": 499000,
-       "currency": "KRW",
-       "primary_image": {
-         "url": "https://example.com/images/sofa1.jpg",
-         "alt_text": "브라운 소파 정면"
-       },
-       "brand": {
-         "id": 2,
-         "name": "편안가구"
-       },
-       "rating": 4.7,
-       "review_count": 128,
-       "in_stock": true,
-       "created_at": "2025-04-10T09:30:00Z"
-     },
-     // ... 추가 검색 결과
-   ],
-   "filters": {
-     "categories": [
-       { "id": 5, "name": "소파", "count": 65 },
-       { "id": 6, "name": "의자", "count": 12 },
-       { "id": 8, "name": "3인용 소파", "count": 40 }
-     ],
-     "brands": [
-       { "id": 2, "name": "편안가구", "count": 25 },
-       { "id": 3, "name": "모던홈", "count": 18 }
-     ],
-     "price_ranges": [
-       { "min": 0, "max": 300000, "count": 15 },
-       { "min": 300000, "max": 600000, "count": 45 },
-       { "min": 600000, "max": null, "count": 27 }
-     ]
-   },
-   "pagination": {
-     "totalItems": 87,
-     "totalPages": 9,
-     "currentPage": 1,
-     "perPage": 10
-   }
- },
- "message": "검색 결과를 성공적으로 조회했습니다."
-}
-```
-
-**에러 응답 예시 (400 Bad Request)**
-```json
-{
- "success": false,
- "error": {
-   "code": "INVALID_INPUT",
-   "message": "검색어는 필수 항목입니다."
- }
 }
 ```
 
@@ -984,7 +903,14 @@ Authorization: Bearer {token}
          "id": 2,
          "name": "편안가구"
        },
+       "seller": {
+         "id": 1,
+         "name": "홈퍼니처"
+       },
        "rating": 4.7,
+       "review_count": 128,
+       "in_stock": true,
+       "status": "ACTIVE",
        "created_at": "2025-04-10T09:30:00Z"
      },
      // ... 추가 신규 상품
@@ -1006,7 +932,14 @@ Authorization: Bearer {token}
          "id": 3,
          "name": "모던홈"
        },
+       "seller": {
+         "id": 1,
+         "name": "홈퍼니처"
+       },
        "rating": 4.9,
+       "review_count": 50,
+       "in_stock": true,
+       "status": "ACTIVE",
        "created_at": "2025-02-15T14:30:00Z"
      },
      // ... 추가 인기 상품
@@ -1088,10 +1021,10 @@ Authorization: Bearer {token}
      }
    },
    "pagination": {
-     "totalItems": 128,
-     "totalPages": 13,
-     "currentPage": 1,
-     "perPage": 10
+     "total_items": 128,
+     "total_pages": 13,
+     "current_page": 1,
+     "per_page": 10
    }
  },
  "message": "상품 리뷰를 성공적으로 조회했습니다."
